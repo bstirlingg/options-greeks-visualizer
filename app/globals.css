@@ -38,6 +38,8 @@
   --sidebar-accent-foreground: oklch(1 0 0); /* #ffffff - Text color for sidebar accent elements */
   --sidebar-border: oklch(0.92 0 0); /* #e5e7eb - Border color for sidebar */
   --sidebar-ring: oklch(0.55 0.15 264); /* #6366f1 - Focus ring color for sidebar elements */
+  --font-inter: "Inter", sans-serif;
+  --font-jetbrains-mono: "JetBrains Mono", monospace;
 }
 
 .dark {
@@ -76,6 +78,9 @@
 }
 
 @theme inline {
+  /* Updated font configuration to use Inter and JetBrains Mono */
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

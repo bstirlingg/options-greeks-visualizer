@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { InfoIcon, BookOpenIcon } from "lucide-react"
+import { InfoIcon, BookOpenIcon, PlayIcon, CheckCircleIcon, TrendingUpIcon, TrendingDownIcon } from "lucide-react"
 
 interface OptionsParams {
   spotPrice: number
@@ -52,6 +52,12 @@ export default function OptionsCalculator() {
   const [isLoading, setIsLoading] = useState(false)
   const [showEducation, setShowEducation] = useState(false)
   const [selectedGreek, setSelectedGreek] = useState<string | null>(null)
+  const [showScenarios, setShowScenarios] = useState(false)
+  const [showQuiz, setShowQuiz] = useState(false)
+  const [showHistoricalExamples, setShowHistoricalExamples] = useState(false)
+  const [currentQuizQuestion, setCurrentQuizQuestion] = useState(0)
+  const [quizAnswers, setQuizAnswers] = useState<number[]>([])
+  const [scenarioResults, setScenarioResults] = useState<any>(null)
 
   const calculateGreeksAPI = async (newParams: OptionsParams) => {
     setIsLoading(true)
@@ -104,6 +110,36 @@ export default function OptionsCalculator() {
     const newParams = { ...params, [key]: value }
     setParams(newParams)
     calculateGreeksAPI(newParams)
+  }
+
+  const runScenario = async (scenario: any) => {
+    const newParams = { ...params, ...scenario.changes }
+    setIsLoading(true)
+
+    try {
+      const response = await fetch("/api/calculate-greeks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newParams),
+      })
+
+      const result = await response.json()
+      const priceDiff = result.price - greeks.price
+      const percentChange = ((result.price - greeks.price) / greeks.price) * 100
+
+      setScenarioResults({
+        scenario: scenario.name,
+        originalPrice: greeks.price,
+        newPrice: result.price,
+        priceDiff,
+        percentChange,
+        newGreeks: result,
+      })
+    } catch (error) {
+      console.error("Scenario calculation failed:", error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -173,13 +209,99 @@ export default function OptionsCalculator() {
     },
   }
 
+  const scenarios = [
+    {
+      name: "Stock Jumps 10% Tomorrow",
+      description: "What happens if the stock price increases by 10% overnight?",
+      changes: { spotPrice: params.spotPrice * 1.1, timeToExpiry: params.timeToExpiry - 1 },
+      icon: <TrendingUpIcon className="w-4 h-4" />,
+    },
+    {
+      name: "Stock Drops 15%",
+      description: "Impact of a significant 15% stock price decline",
+      changes: { spotPrice: params.spotPrice * 0.85, timeToExpiry: params.timeToExpiry - 1 },
+      icon: <TrendingDownIcon className="w-4 h-4" />,
+    },
+    {
+      name: "Volatility Spike (+50%)",
+      description: "Market panic increases implied volatility by 50%",
+      changes: { volatility: Math.min(1.0, params.volatility * 1.5) },
+      icon: <TrendingUpIcon className="w-4 h-4" />,
+    },
+    {
+      name: "One Week Passes",
+      description: "Time decay effect over 7 days with no price change",
+      changes: { timeToExpiry: Math.max(1, params.timeToExpiry - 7) },
+      icon: <PlayIcon className="w-4 h-4" />,
+    },
+  ]
+
+  const quizQuestions = [
+    {
+      question:
+        "If a call option has a delta of 0.6, and the stock price increases by $2, approximately how much will the option price increase?",
+      options: ["$0.60", "$1.20", "$2.00", "$0.30"],
+      correct: 1,
+      explanation: "Delta of 0.6 means the option moves $0.60 for every $1 stock move. So $2 × 0.6 = $1.20",
+    },
+    {
+      question: "Which Greek measures time decay?",
+      options: ["Delta", "Gamma", "Theta", "Vega"],
+      correct: 2,
+      explanation: "Theta measures how much an option loses value each day due to time decay.",
+    },
+    {
+      question: "When is gamma highest?",
+      options: ["Deep in-the-money", "Deep out-of-the-money", "At-the-money near expiration", "Long-term options"],
+      correct: 2,
+      explanation:
+        "Gamma is highest for at-the-money options, especially near expiration when delta changes most rapidly.",
+    },
+    {
+      question: "If implied volatility increases, what happens to option prices?",
+      options: [
+        "Only calls increase",
+        "Only puts increase",
+        "Both calls and puts increase",
+        "Both calls and puts decrease",
+      ],
+      correct: 2,
+      explanation:
+        "Higher volatility increases the probability of large price moves, making both calls and puts more valuable.",
+    },
+  ]
+
+  const historicalExamples = [
+    {
+      title: "GameStop Squeeze (Jan 2021)",
+      scenario: "GME $40 → $350 in days",
+      setup: { spotPrice: 40, strikePrice: 50, timeToExpiry: 14, volatility: 2.5, optionType: "call" },
+      lesson: "Extreme gamma squeeze - delta hedging by market makers amplified the move",
+      impact: "Call options with delta 0.3 became delta 0.9+ as stock rocketed",
+    },
+    {
+      title: "Tesla Earnings Volatility",
+      scenario: "TSLA options before earnings",
+      setup: { spotPrice: 800, strikePrice: 800, timeToExpiry: 3, volatility: 0.8, optionType: "call" },
+      lesson: "High vega exposure - options expensive due to earnings uncertainty",
+      impact: "Volatility crush after earnings announcement despite stock moving favorably",
+    },
+    {
+      title: "March 2020 COVID Crash",
+      scenario: "SPY puts during market crash",
+      setup: { spotPrice: 250, strikePrice: 280, timeToExpiry: 30, volatility: 0.9, optionType: "put" },
+      lesson: "Negative delta hedging - put buyers forced more selling",
+      impact: "Put options gained value from both falling prices and rising volatility",
+    },
+  ]
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold text-foreground">Options Greeks Visualizer</h1>
         <p className="text-muted-foreground">Interactive tool for analyzing option sensitivities with Python backend</p>
-        <div className="flex justify-center gap-2 mt-4">
+        <div className="flex justify-center gap-2 mt-4 flex-wrap">
           <Button
             variant={showEducation ? "default" : "outline"}
             onClick={() => setShowEducation(!showEducation)}
@@ -187,6 +309,30 @@ export default function OptionsCalculator() {
           >
             <BookOpenIcon className="w-4 h-4" />
             {showEducation ? "Hide Education" : "Learn Greeks"}
+          </Button>
+          <Button
+            variant={showScenarios ? "default" : "outline"}
+            onClick={() => setShowScenarios(!showScenarios)}
+            className="flex items-center gap-2"
+          >
+            <PlayIcon className="w-4 h-4" />
+            Interactive Scenarios
+          </Button>
+          <Button
+            variant={showQuiz ? "default" : "outline"}
+            onClick={() => setShowQuiz(!showQuiz)}
+            className="flex items-center gap-2"
+          >
+            <CheckCircleIcon className="w-4 h-4" />
+            Greeks Quiz
+          </Button>
+          <Button
+            variant={showHistoricalExamples ? "default" : "outline"}
+            onClick={() => setShowHistoricalExamples(!showHistoricalExamples)}
+            className="flex items-center gap-2"
+          >
+            <TrendingUpIcon className="w-4 h-4" />
+            Historical Examples
           </Button>
         </div>
       </div>
@@ -267,6 +413,204 @@ export default function OptionsCalculator() {
                 </TabsContent>
               ))}
             </Tabs>
+          </CardContent>
+        </Card>
+      )}
+
+      {showScenarios && (
+        <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-green-900">
+              <PlayIcon className="w-5 h-5" />
+              Interactive Scenarios
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              {scenarios.map((scenario, index) => (
+                <Card
+                  key={index}
+                  className="bg-white border hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => runScenario(scenario)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="text-green-600 mt-1">{scenario.icon}</div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-green-900 mb-1">{scenario.name}</h4>
+                        <p className="text-sm text-green-700">{scenario.description}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {scenarioResults && (
+              <Card className="bg-white border-2 border-green-300">
+                <CardHeader>
+                  <CardTitle className="text-green-900">Scenario Results: {scenarioResults.scenario}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-900">
+                        ${scenarioResults.originalPrice.toFixed(2)} → ${scenarioResults.newPrice.toFixed(2)}
+                      </div>
+                      <p className="text-sm text-green-700">Option Price Change</p>
+                    </div>
+                    <div className="text-center">
+                      <div
+                        className={`text-2xl font-bold ${scenarioResults.priceDiff >= 0 ? "text-green-600" : "text-red-600"}`}
+                      >
+                        {scenarioResults.priceDiff >= 0 ? "+" : ""}${scenarioResults.priceDiff.toFixed(2)}
+                      </div>
+                      <p className="text-sm text-green-700">Dollar Change</p>
+                    </div>
+                    <div className="text-center">
+                      <div
+                        className={`text-2xl font-bold ${scenarioResults.percentChange >= 0 ? "text-green-600" : "text-red-600"}`}
+                      >
+                        {scenarioResults.percentChange >= 0 ? "+" : ""}
+                        {scenarioResults.percentChange.toFixed(1)}%
+                      </div>
+                      <p className="text-sm text-green-700">Percent Change</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {showQuiz && (
+        <Card className="bg-gradient-to-r from-purple-50 to-violet-50 border-purple-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-purple-900">
+              <CheckCircleIcon className="w-5 h-5" />
+              Greeks Knowledge Quiz
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {currentQuizQuestion < quizQuestions.length ? (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <Badge variant="outline">
+                    Question {currentQuizQuestion + 1} of {quizQuestions.length}
+                  </Badge>
+                  <div className="text-sm text-purple-700">
+                    Score: {quizAnswers.filter((a, i) => a === quizQuestions[i].correct).length}/{quizAnswers.length}
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-lg border">
+                  <h3 className="text-lg font-semibold text-purple-900 mb-4">
+                    {quizQuestions[currentQuizQuestion].question}
+                  </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {quizQuestions[currentQuizQuestion].options.map((option, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        className="text-left justify-start h-auto p-4 bg-transparent"
+                        onClick={() => {
+                          const newAnswers = [...quizAnswers, index]
+                          setQuizAnswers(newAnswers)
+                          setTimeout(() => setCurrentQuizQuestion(currentQuizQuestion + 1), 1500)
+                        }}
+                      >
+                        <span className="font-semibold mr-2">{String.fromCharCode(65 + index)}.</span>
+                        {option}
+                      </Button>
+                    ))}
+                  </div>
+
+                  {quizAnswers.length > currentQuizQuestion && (
+                    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                      <div
+                        className={`font-semibold ${quizAnswers[currentQuizQuestion] === quizQuestions[currentQuizQuestion].correct ? "text-green-700" : "text-red-700"}`}
+                      >
+                        {quizAnswers[currentQuizQuestion] === quizQuestions[currentQuizQuestion].correct
+                          ? "✓ Correct!"
+                          : "✗ Incorrect"}
+                      </div>
+                      <p className="text-sm text-blue-800 mt-2">{quizQuestions[currentQuizQuestion].explanation}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center space-y-4">
+                <div className="text-6xl">🎉</div>
+                <h3 className="text-2xl font-bold text-purple-900">Quiz Complete!</h3>
+                <div className="text-xl text-purple-700">
+                  Final Score: {quizAnswers.filter((a, i) => a === quizQuestions[i].correct).length}/
+                  {quizQuestions.length}
+                </div>
+                <Button
+                  onClick={() => {
+                    setCurrentQuizQuestion(0)
+                    setQuizAnswers([])
+                  }}
+                >
+                  Retake Quiz
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {showHistoricalExamples && (
+        <Card className="bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-orange-900">
+              <TrendingUpIcon className="w-5 h-5" />
+              Historical Options Examples
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {historicalExamples.map((example, index) => (
+                <Card key={index} className="bg-white border">
+                  <CardContent className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <h3 className="text-lg font-bold text-orange-900 mb-2">{example.title}</h3>
+                        <p className="text-orange-800 font-semibold mb-3">{example.scenario}</p>
+                        <p className="text-sm text-orange-700 mb-4">{example.lesson}</p>
+                        <div className="bg-orange-100 p-3 rounded text-sm text-orange-800">
+                          <strong>Key Impact:</strong> {example.impact}
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-orange-900 mb-3">Try This Setup:</h4>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            const newParams = { ...params, ...example.setup }
+                            setParams(newParams)
+                            calculateGreeksAPI(newParams)
+                          }}
+                          className="w-full mb-3"
+                        >
+                          Load Example Parameters
+                        </Button>
+                        <div className="text-xs text-orange-700 space-y-1">
+                          <div>Spot: ${example.setup.spotPrice}</div>
+                          <div>Strike: ${example.setup.strikePrice}</div>
+                          <div>Days: {example.setup.timeToExpiry}</div>
+                          <div>Vol: {(example.setup.volatility * 100).toFixed(0)}%</div>
+                          <div>Type: {example.setup.optionType}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </CardContent>
         </Card>
       )}
