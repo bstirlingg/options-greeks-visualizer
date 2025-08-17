@@ -1,24 +1,26 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import { JetBrains_Mono } from "next/font/google"
+import { Work_Sans, Open_Sans } from "next/font/google"
 import "./globals.css"
 
-const inter = Inter({
+const workSans = Work_Sans({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-inter",
+  variable: "--font-work-sans",
+  weight: ["400", "600", "700", "800", "900"],
 })
 
-const jetbrainsMono = JetBrains_Mono({
+const openSans = Open_Sans({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-jetbrains-mono",
+  variable: "--font-open-sans",
+  weight: ["400", "500", "600", "700"],
 })
 
 export const metadata: Metadata = {
-  title: "Options Greeks Visualizer",
-  description: "Professional interactive options Greeks calculator and educational tool",
+  title: "Options Greeks Visualizer - Professional Financial Tool",
+  description:
+    "Revolutionary options Greeks calculator with cutting-edge design and Python backend calculations. Interactive educational tool for finance professionals.",
   generator: "v0.app",
 }
 
@@ -28,13 +30,13 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en" className={`${workSans.variable} ${openSans.variable} antialiased`}>
       <head>
         <style>{`
 html {
-  font-family: ${inter.style.fontFamily};
-  --font-sans: ${inter.style.fontFamily};
-  --font-mono: ${jetbrainsMono.style.fontFamily};
+  font-family: ${openSans.style.fontFamily};
+  --font-sans: ${openSans.style.fontFamily};
+  --font-heading: ${workSans.style.fontFamily};
 }
         `}</style>
       </head>

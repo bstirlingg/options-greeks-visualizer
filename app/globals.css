@@ -4,40 +4,40 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated color tokens to match financial dashboard design brief */
-  --background: oklch(1 0 0); /* #ffffff - Main background */
-  --foreground: oklch(0.26 0 0); /* #374151 - Primary text color */
-  --card: oklch(0.98 0 0); /* #f8fafc - Background for cards containing data */
-  --card-foreground: oklch(0.15 0 0); /* #1f2937 - Text color for card content */
-  --popover: oklch(1 0 0); /* #ffffff - Background for tooltip/popover */
-  --popover-foreground: oklch(0.26 0 0); /* #374151 - Text color for tooltip/popover */
-  --primary: oklch(0.26 0 0); /* #374151 - Main primary color for UI elements */
-  --primary-foreground: oklch(1 0 0); /* #ffffff - Text color for primary elements */
-  --secondary: oklch(0.55 0.15 264); /* #6366f1 - Accent color for highlights */
-  --secondary-foreground: oklch(1 0 0); /* #ffffff - Text color for secondary elements */
-  --muted: oklch(0.98 0 0); /* #f8fafc - Muted background for less important data */
-  --muted-foreground: oklch(0.26 0 0); /* #374151 - Text color for muted elements */
-  --accent: oklch(0.55 0.15 264); /* #6366f1 - Accent color for calls to action */
-  --accent-foreground: oklch(1 0 0); /* #ffffff - Text color for accent elements */
-  --destructive: oklch(0.55 0.22 25); /* #dc2626 - Color for error messages or alerts */
-  --destructive-foreground: oklch(1 0 0); /* #ffffff - Text color for destructive elements */
-  --border: oklch(0.92 0 0); /* #e5e7eb - Light border color for separation */
-  --input: oklch(1 0 0); /* #ffffff - Input field background */
-  --ring: oklch(0.55 0.15 264); /* #6366f1 - Focus ring color */
-  --chart-1: oklch(0.65 0.18 45); /* #d97706 - Orange for Delta */
-  --chart-2: oklch(0.55 0.22 25); /* #dc2626 - Red for Gamma */
-  --chart-3: oklch(0.55 0.15 264); /* #6366f1 - Blue for Theta */
-  --chart-4: oklch(0.75 0.15 140); /* #4ade80 - Green for Vega */
-  --chart-5: oklch(0.7 0.18 65); /* #f59e0b - Amber for Rho */
-  --radius: 0.5rem;
-  --sidebar: oklch(0.98 0 0); /* #f8fafc - Sidebar background */
-  --sidebar-foreground: oklch(0.26 0 0); /* #374151 - Text color for sidebar */
-  --sidebar-primary: oklch(1 0 0); /* #ffffff - Background for primary sidebar elements */
-  --sidebar-primary-foreground: oklch(0.26 0 0); /* #374151 - Text color for primary sidebar elements */
-  --sidebar-accent: oklch(0.55 0.15 264); /* #6366f1 - Accent color for sidebar highlights */
-  --sidebar-accent-foreground: oklch(1 0 0); /* #ffffff - Text color for sidebar accent elements */
-  --sidebar-border: oklch(0.92 0 0); /* #e5e7eb - Border color for sidebar */
-  --sidebar-ring: oklch(0.55 0.15 264); /* #6366f1 - Focus ring color for sidebar elements */
+  /* Updated color tokens to match revolutionary design brief */
+  --background: #ffffff; /* Clean background for clarity */
+  --foreground: #4b5563; /* Main text color for legibility */
+  --card: #f9fafb; /* Card background for data visualization */
+  --card-foreground: #4b5563; /* Text color within cards */
+  --popover: #ffffff; /* Popover background for tooltips and additional info */
+  --popover-foreground: #4b5563; /* Text color in popovers */
+  --primary: #0891b2; /* Primary action color for buttons and highlights */
+  --primary-foreground: #ffffff; /* Text color for primary buttons */
+  --secondary: #84cc16; /* Accent color for interactive elements */
+  --secondary-foreground: #ffffff; /* Text color for secondary buttons */
+  --muted: #f9fafb; /* Muted background for less prominent elements */
+  --muted-foreground: #4b5563; /* Text color for muted elements */
+  --accent: #15803d; /* Additional accent color for emphasis */
+  --accent-foreground: #ffffff; /* Text color for accent elements */
+  --destructive: #d97706; /* Color for error or destructive actions */
+  --destructive-foreground: #ffffff; /* Text color for destructive actions */
+  --border: #e5e7eb; /* Light border for delineation between elements */
+  --input: #f9fafb; /* Input field background */
+  --ring: rgba(8, 145, 178, 0.5); /* Subtle focus ring for buttons and inputs */
+  --chart-1: #0891b2; /* Primary color for first chart element */
+  --chart-2: #15803d; /* Color for second chart element */
+  --chart-3: #d97706; /* Color for third chart element */
+  --chart-4: #4b5563; /* Color for fourth chart element */
+  --chart-5: #84cc16; /* Color for fifth chart element */
+  --radius: 0.5rem; /* Rounded corners for a modern look */
+  --sidebar: #f9fafb; /* Sidebar background */
+  --sidebar-foreground: #4b5563; /* Sidebar text color */
+  --sidebar-primary: #0891b2; /* Primary color in the sidebar */
+  --sidebar-primary-foreground: #ffffff; /* Text color for primary elements in sidebar */
+  --sidebar-accent: #84cc16; /* Accent color in sidebar */
+  --sidebar-accent-foreground: #ffffff; /* Text color for accent elements in sidebar */
+  --sidebar-border: #e5e7eb; /* Border color for sidebar */
+  --sidebar-ring: rgba(8, 145, 178, 0.5); /* Focus ring for sidebar elements */
   --font-inter: "Inter", sans-serif;
   --font-jetbrains-mono: "JetBrains Mono", monospace;
 }
@@ -125,5 +125,72 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Added premium design effects for revolutionary interface */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(5px) rotate(-1deg);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(34, 197, 94, 0.5);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.8);
+    transform: scale(1.05);
+  }
+}
+
+.float-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.premium-shadow {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.soft-shadow {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* Print styles */
+@media print {
+  .glass-card {
+    background: white;
+    backdrop-filter: none;
+    border: 1px solid #e5e7eb;
+  }
+
+  .premium-shadow,
+  .soft-shadow {
+    box-shadow: none;
+  }
+
+  .float-animation,
+  .pulse-glow {
+    animation: none;
   }
 }
